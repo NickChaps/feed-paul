@@ -58,7 +58,7 @@ npm run verify
 npm run record
 ```
 
-Set `BROWSER_CHANNEL` to another supported installed Playwright browser channel if needed. The `?inspect` URL enables a local inspection bridge used by these scripts; normal games do not run an automatic player. The video explicitly labels its automated performance as a gameplay demo, uses the normal rules, and records the game's own live Web Audio soundtrack.
+Set `BROWSER_CHANNEL` to another supported installed Playwright browser channel if needed. The `?inspect` URL enables a local inspection bridge used by these scripts; normal games do not run an automatic player. The video shows one complete round without cuts, labels its automated performance as a gameplay demo, uses the normal rules, and records the game's own live Web Audio soundtrack.
 
 `npm run verify` checks keyboard and touch controls, pause/resume, scoring, persistent best scores, share drafts, and a complete 60-second round. `npm run record` writes the full WebM capture to `output/`. Run `bash scripts/encode.sh` with FFmpeg installed to make the MP4 versions.
 
