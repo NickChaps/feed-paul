@@ -1,0 +1,16 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const browser=await chromium.launch({channel:'chrome',headless:true});const errors=[];const page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
+const url=process.env.FEED_PAUL_URL || 'http://127.0.0.1:4182/';await page.goto(url+'?inspect');
+assert.equal(await page.evaluate(()=>feedPaul.musicPlaying),false);
+await page.locator('#pick-paul').click();await page.waitForFunction(()=>feedPaul.musicPlaying);assert.equal(await page.evaluate(()=>feedPaul.state.phase),'menu');
+await page.locator('#music').click();assert.equal(await page.evaluate(()=>feedPaul.musicPlaying),false);
+await page.locator('#pick-other').click();assert.equal(await page.evaluate(()=>feedPaul.musicPlaying),false);
+await page.reload();await page.locator('#pick-paul').click();assert.equal(await page.evaluate(()=>feedPaul.musicPlaying),false);
+await page.locator('#music').click();await page.waitForFunction(()=>feedPaul.musicPlaying);
+await page.locator('#go').click();await page.keyboard.press('p');assert.equal(await page.evaluate(()=>feedPaul.musicPlaying),false);
+await page.locator('#quit').click();await page.waitForFunction(()=>feedPaul.musicPlaying);assert.equal(await page.evaluate(()=>feedPaul.state.phase),'menu');
+await page.screenshot({path:'output/playwright/menu-music.png'});
+const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});await mobile.goto(url+'?inspect');await mobile.locator('#pick-paul').tap();await mobile.waitForFunction(()=>feedPaul.musicPlaying);await mobile.screenshot({path:'output/playwright/mobile-menu-music.png'});
+assert.deepEqual(errors,[]);const result={url,firstGestureStartsMusic:true,mutePersists:true,menuReturnRestarts:true,mobileTapStarts:true,errors};await fs.writeFile('output/playwright/menu-music-verification.json',JSON.stringify(result,null,2));console.log(result);await browser.close();

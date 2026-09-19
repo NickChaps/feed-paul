@@ -228,6 +228,7 @@ footer a{color:var(--ink-600)}
       <h1>Feed Paul</h1>
       <p class="lede">Catch slides that match the <b>live template</b>. Dodge the rest. Every nine seconds, the brief changes. Your final score is <b>points × brand cohesion</b>.</p>
 
+      <p class="hint" id="music-hint">Music starts with your first click or tap.</p>
       <div class="legend" id="legend"></div>
 
       <div class="pick" role="group" aria-label="Choose your character">
@@ -514,6 +515,7 @@ function startMusic(){
   try{
     AC = AC || new (window.AudioContext||window.webkitAudioContext)();
     if (AC.state === "suspended") AC.resume();
+    $("#music-hint").hidden = true;
     if (musicBus) stopMusic(0);
     musicBus = AC.createGain();
     musicBus.gain.setValueAtTime(0.0001, AC.currentTime);
@@ -1241,7 +1243,7 @@ function start(){
   beep(660,.06,"sine",.035);
   startMusic();
 }
-function toMenu(){ $("#heckle").hidden=true; $("#s-pause").hidden = true; $("#pause").hidden = true; stopMusic(.35); S.phase = "menu"; sMenu.hidden = false; sOver.hidden = true; stage.classList.add("menu"); }
+function toMenu(){ $("#heckle").hidden=true; $("#s-pause").hidden = true; $("#pause").hidden = true; stopMusic(.35); S.phase = "menu"; sMenu.hidden = false; sOver.hidden = true; stage.classList.add("menu"); startMusic(); }
 
 function finish(){
   $("#pause").hidden = true; $("#heckle").hidden = true;
@@ -1315,13 +1317,21 @@ $("#music").addEventListener("click", e => {
   b.setAttribute("aria-label", S.music ? "Mute music" : "Unmute music");
   try{ localStorage.setItem("feedpaul.music", S.music ? "on" : "off"); }catch(err){}
   // toggling mid-round takes effect immediately, both ways
-  if (S.music && (S.phase === "play" || S.phase === "count")) startMusic();
+  if (S.music && ["menu","play","count"].includes(S.phase)) startMusic();
   else if (!S.music) stopMusic(.25);
 });
 $("#sound").classList.toggle("off", !S.sound);
 $("#music").classList.toggle("off", !S.music);
 $("#sound").setAttribute("aria-label", S.sound ? "Mute sound effects" : "Unmute sound effects");
 $("#music").setAttribute("aria-label", S.music ? "Mute music" : "Unmute music");
+
+function startMenuMusic(){
+  if(S.phase === "menu" && S.music && !musicBus) startMusic();
+}
+// Start within a real user gesture, respecting browser autoplay and saved mute preferences.
+document.addEventListener("click", startMenuMusic);
+document.addEventListener("keydown", startMenuMusic);
+if(!S.music) $("#music-hint").hidden = true;
 
 function shareURL(){ return SHARE_URL || location.href.split("#")[0]; }
 function shareText(){
@@ -1383,7 +1393,8 @@ const avatars = [...document.querySelectorAll("canvas[data-av]")].map(el => ({
 if(new URLSearchParams(location.search).has("inspect")) window.feedPaul = {
   state:S, metrics, finalScore, start, finish, update, render, valid, cohDelta, ptsDelta, swallow, heckle,
   steer(){ const M=metrics(), B={accuracy:1,speed:.95,react:.1}; const target=pickTarget(S.me,B,M); S.input="pointer"; S.pointer=target ? target.x : safeLane(S.me,B,M); },
-  get audio(){return AC;}
+  get audio(){return AC;},
+  get musicPlaying(){return !!musicBus && AC?.state === "running";}
 };
 (function idleClock(){ if (S.phase === "menu") S.t += 1/60; requestAnimationFrame(idleClock); })();
 })();

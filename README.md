@@ -25,7 +25,7 @@ Open `index.html` in a modern browser. The game, Latin font files, music, and so
 - Move with a mouse, a finger, the arrow keys, A/D, or Q/D.
 - Press ↑ to heckle your opponent. It distracts them for 0.9 seconds, with a seven-second cooldown. There is a touch button too.
 - Press P or Escape to pause and resume. Switching away from the game pauses it automatically.
-- Use the music and sound buttons independently.
+- Music starts on the character-selection screen with your first click, tap, or key press, and returns when you go back to the menu. Browsers require that first interaction before playing audio. Use the music and sound buttons independently; saved mute preferences are respected.
 - At the end, replay, change character, copy the link, or prepare a score post on X.
 
 Your best score and audio preferences stay in browser local storage. There is no analytics service or backend.

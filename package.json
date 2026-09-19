@@ -10,7 +10,8 @@
     "start": "node scripts/serve.mjs",
     "verify": "node scripts/verify.mjs",
     "record": "node scripts/record.mjs",
-    "verify:video": "node scripts/verify-video.mjs"
+    "verify:video": "node scripts/verify-video.mjs",
+    "verify:menu": "node scripts/verify-menu-music.mjs"
   },
   "devDependencies": {
     "playwright": "1.63.0"
