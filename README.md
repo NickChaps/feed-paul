@@ -58,9 +58,9 @@ npm run verify
 npm run record
 ```
 
-Set `BROWSER_CHANNEL` to another supported installed Playwright browser channel if needed. The `?inspect` URL enables a local inspection bridge used by these scripts; normal games do not run an automatic player. The video shows one complete round without cuts, labels its automated performance as a gameplay demo, uses the normal rules, and records the game's own live Web Audio soundtrack.
+Set `BROWSER_CHANNEL` to another supported installed Playwright browser channel if needed. The `?inspect` URL enables a local inspection bridge used by these scripts; normal games do not run an automatic player. The current public video records the entire native game screen: character selection, the Competent difficulty, the round, and the game's own result screen. Paul wins 88–75. It uses a pixel-based automated controller (`npm run record:visual`) that reads browser screenshots and sends normal mouse movements and Up-arrow presses. It does not use the inspection bridge, game variables, a chosen random seed, or modified rules. Audio is recorded from the live game. The original state-based recording script remains available as a development tool, but was not used for this video.
 
-`npm run verify` checks keyboard and touch controls, pause/resume, scoring, persistent best scores, share drafts, and a complete 60-second round. `npm run record` writes the full WebM capture to `output/`. Run `bash scripts/encode.sh` with FFmpeg installed to make the MP4 versions.
+`npm run verify` checks keyboard and touch controls, pause/resume, scoring, persistent best scores, share drafts, and a complete 60-second round. `npm run record` writes the full WebM capture to `output/`. For the visual controller, run `npm run record:visual`, then `node scripts/encode-visual.mjs output/fair-play/<capture>` using the directory printed by the recorder. This muxes the full screen capture with its recorded audio, without cuts or replacement graphics. FFmpeg must be installed. The older `scripts/encode.sh` only applies to the original development capture.
 
 ## License
 

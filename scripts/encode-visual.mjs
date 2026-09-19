@@ -1,0 +1,10 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
+const capture=process.argv[2];
+if(!capture)throw new Error('Usage: node scripts/encode-visual.mjs output/fair-play/<capture>');
+const result=JSON.parse(await fs.readFile(path.join(capture,'result.json'),'utf8'));
+const delay=Math.round(result.audioOffset*1000);
+const encoded=spawnSync('ffmpeg',['-y','-i',path.join(capture,'screen.webm'),'-i',path.join(capture,'audio.webm'),'-map','0:v:0','-map','1:a:0','-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-af',`loudnorm=I=-18:TP=-1.5:LRA=11,adelay=${delay}|${delay},apad`,'-c:a','aac','-b:a','192k','-ar','48000','-shortest','-movflags','+faststart','output/Feed-Paul-X.mp4'],{stdio:'inherit'});
+if(encoded.status!==0)process.exit(encoded.status||1);
+await fs.copyFile('output/Feed-Paul-X.mp4','output/Feed-Paul-full.mp4');
