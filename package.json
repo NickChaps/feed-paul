@@ -1,0 +1,26 @@
+{
+  "name": "feed-paul",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sixty seconds to build a deck that survives review. A browser game created with Claude Opus 5.",
+  "author": "Nicolas Chapuis (@Nicolas_chap)",
+  "license": "MIT",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "verify": "node scripts/verify.mjs",
+    "record": "node scripts/record.mjs",
+    "verify:video": "node scripts/verify-video.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NickChaps/feed-paul.git"
+  },
+  "homepage": "https://nickchaps.github.io/feed-paul/"
+}
