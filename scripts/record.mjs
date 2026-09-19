@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 const browser=await chromium.launch({channel:process.env.BROWSER_CHANNEL||'chrome',headless:true,args:['--autoplay-policy=no-user-gesture-required','--disable-background-timer-throttling','--disable-renderer-backgrounding']});
 const page=await browser.newPage({viewport:{width:980,height:780},deviceScaleFactor:1,acceptDownloads:true});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
-await page.addInitScript(()=>{
+const seed=Number(process.env.RECORD_SEED || 270919);
+await page.addInitScript(initialSeed=>{
  const connect=AudioNode.prototype.connect;
  AudioNode.prototype.connect=function(destination,...rest){
    if(destination instanceof AudioDestinationNode){
@@ -12,9 +13,9 @@ await page.addInitScript(()=>{
    }
    return connect.call(this,destination,...rest);
  };
- // A repeatable performance; randomness still follows the game's rules.
- let seed=193719;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-});
+ // Seeded randomness follows the normal rules; frame pacing can still vary the performance.
+ let seed=initialSeed;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+},seed);
 await page.goto('http://127.0.0.1:4182/?inspect');await page.evaluate(()=>document.fonts.ready);
 await page.addStyleTag({content:'#app{padding:0;gap:0}footer{display:none}#stage{border:0;border-radius:0;max-width:none}'});
 await page.locator('#go').click();
@@ -25,11 +26,11 @@ await page.evaluate(()=>{
  const recorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9,opus',videoBitsPerSecond:10000000,audioBitsPerSecond:192000});
  const chunks=[];recorder.ondataavailable=e=>chunks.push(e.data);
  recorder.onstop=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(chunks,{type:recorder.mimeType}));a.download='Feed-Paul-full.webm';a.click();};
- const started=performance.now();let endAt=null, nextHeckle=12;
+ const started=performance.now();let endAt=null, nextHeckle=12, nextSteer=0;
  const title=(text,y,size=32,color='#141413',font='Schibsted Grotesk')=>{g.fillStyle=color;g.font=`500 ${size}px "${font}"`;g.textAlign='center';g.fillText(text,540,y);};
  function draw(){
    const s=feedPaul.state,t=(performance.now()-started)/1000;
-   if(s.phase==='play'){feedPaul.steer();if(t>=nextHeckle){feedPaul.heckle();nextHeckle+=14;}}
+   if(s.phase==='play'){if(t>=nextSteer){feedPaul.steer();nextSteer=t+.06;}if(t>=nextHeckle){feedPaul.heckle();nextHeckle+=14;}}
    g.fillStyle='#F7F3EA';g.fillRect(0,0,1080,1080);
    g.textAlign='left';g.fillStyle='#141413';g.font='500 64px "Newsreader"';g.fillText('Feed Paul',46,76);
    g.font='500 18px "IBM Plex Mono"';g.textAlign='right';g.fillStyle='#87867F';g.fillText('60 SECONDS. ONE DECK.',1034,52);
@@ -59,4 +60,5 @@ const download=page.waitForEvent('download',{timeout:100000});
 await page.waitForTimeout(12700);
 await fs.writeFile('output/playwright/video-frame.png',Buffer.from(await page.evaluate(()=>filmCanvas.toDataURL('image/png').split(',')[1]),'base64'));
 const file=await download;await file.saveAs('output/Feed-Paul-full.webm');
-const result=await page.evaluate(()=>filmResult);result.errors=errors;await fs.writeFile('output/recording.json',JSON.stringify(result,null,2));console.log(result);await browser.close();
+await fs.writeFile('output/playwright/video-result.png',Buffer.from(await page.evaluate(()=>filmCanvas.toDataURL('image/png').split(',')[1]),'base64'));
+const result=await page.evaluate(()=>filmResult);result.seed=seed;result.difficulty='Competent';result.errors=errors;await fs.writeFile('output/recording.json',JSON.stringify(result,null,2));console.log(result);await browser.close();
